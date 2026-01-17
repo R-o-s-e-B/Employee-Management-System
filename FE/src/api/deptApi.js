@@ -1,22 +1,23 @@
 import axiosInstance from "../utils/axiosInstance";
 
-export const getDepts = async (orgId) => {
+export const getDeptsApi = async (orgId) => {
   const { data } = await axiosInstance.get("dept/allDepartments", {
     params: { orgId },
   });
   return data;
 };
 
-export const deleteDept = async (params) => {
-  await axiosInstance.delete("dept/deleteDept", params);
+export const deleteDeptApi = async ({ deptId }) => {
+  console.log("dept id for delete is: ", deptId);
+  await axiosInstance.delete(`dept/deleteDept/${deptId}`);
 };
 
-export const createDept = async (params) => {
+export const createDeptApi = async (params) => {
   const { data } = await axiosInstance.post("dept/createDept", params);
   return data;
 };
 
-export const editDept = async (params) => {
-  const { data } = await axiosInstance.post("dept/editDept", params);
+export const editDeptApi = async (params) => {
+  const { data } = await axiosInstance.patch("dept/editDept", params);
   return data;
 };

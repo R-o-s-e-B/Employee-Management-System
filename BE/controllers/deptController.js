@@ -2,8 +2,6 @@ const mongoose = require("mongoose");
 const Department = require("../models/Department");
 
 exports.createDepartment = async (req, res) => {
-  console.log("REQ BODY:", req.body);
-  console.log("REQ USER:", req.user);
   const { name, orgId } = req.body;
   try {
     if (!name) {
@@ -46,22 +44,33 @@ exports.createDepartment = async (req, res) => {
 };
 
 exports.deleteDepartment = async (req, res) => {
-  const { deptId } = req.body;
+  const { deptId } = req.params;
   if (!deptId) {
     return res
       .status(401)
       .json({ success: false, message: "Department ID is required!" });
   }
+
   try {
     const result = await Department.deleteOne({ _id: deptId });
-    return res.status(201).json({
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Department not found",
+      });
+    }
+
+    return res.status(200).json({
       success: true,
-      message: "Department has been deleted",
-      result,
+      message: "Department deleted successfully",
     });
   } catch (err) {
-    console.log(err);
-    return res.status(501).json({ success: true, message: "Server error" });
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
@@ -76,7 +85,7 @@ exports.editDepartment = async (req, res) => {
     const result = await Department.findOneAndUpdate(
       { _id: deptId },
       { name: name },
-      { new: true }
+      { new: true },
     );
     return res
       .status(201)

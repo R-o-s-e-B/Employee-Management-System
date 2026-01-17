@@ -36,9 +36,6 @@ const Home = () => {
       console.log(err);
     }
   };
-
-  console.log("Orgdata is: ", orgData);
-
   const OpenCreateOrgPanel = () => {
     setOrgPanel(!OrgPanel);
   };
@@ -62,7 +59,6 @@ const Home = () => {
       <div className="flex flex-col">
         {orgData ? (
           orgData.map((element) => {
-            console.log(element._id);
             return (
               <p
                 onClick={() => navigate(`/orgDashboard/${element._id}`)}

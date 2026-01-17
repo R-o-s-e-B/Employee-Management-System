@@ -25,7 +25,6 @@ export const useOrgStore = create(
       set({ loading: true });
       try {
         const { result } = await getOrgs(params);
-        console.log("From the org store", result);
         set({ orgData: result });
       } catch (err) {
         throw err;
@@ -55,5 +54,5 @@ export const useOrgStore = create(
         set({ loading: false });
       }
     },
-  }))
+  })),
 );

@@ -20,7 +20,7 @@ const LoginPage = () => {
       "log in fucntion called with credentials: ",
       emailRefLogin.current.value,
       " and password: ",
-      passwordRefLogin.current.value
+      passwordRefLogin.current.value,
     );
     try {
       await login({
@@ -43,7 +43,6 @@ const LoginPage = () => {
         role: "admin",
       });
       SwitchForm();
-      console.log("Signup succesfull");
     } catch (err) {
       console.log(err);
     }

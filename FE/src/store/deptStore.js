@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { getDepts, createDept, deleteDept, editDept } from "../api/deptApi";
+import {
+  getDeptsApi,
+  createDeptApi,
+  deleteDeptApi,
+  editDeptApi,
+} from "../api/deptApi";
 import { persist } from "zustand/middleware";
 
 export const useDeptStore = create(
@@ -13,12 +18,13 @@ export const useDeptStore = create(
     createDept: async (params) => {
       set({ loading: true });
       try {
-        const { result } = await createDept(params);
-        set({
+        const { result } = await createDeptApi(params);
+        set((state) => ({
           deptId: result._id,
           deptName: result.name,
           deptData: result,
-        });
+          deptList: state.deptList ? [...state.deptList, result] : [result],
+        }));
       } catch (err) {
         throw err;
       } finally {
@@ -27,10 +33,9 @@ export const useDeptStore = create(
     },
 
     getAllDepts: async ({ orgId }) => {
-      console.log("org id in store", orgId);
       set({ loading: true });
       try {
-        const { result } = await getDepts(orgId);
+        const { result } = await getDeptsApi(orgId);
         set({ deptList: result });
       } catch (err) {
         throw err;
@@ -42,7 +47,12 @@ export const useDeptStore = create(
     editDept: async (params) => {
       set({ loading: true });
       try {
-        await editDept(params);
+        const { result } = await editDeptApi(params);
+        set((state) => ({
+          deptList: state.deptList.map((dept) =>
+            dept._id === result._id ? result : dept,
+          ),
+        }));
       } catch (err) {
         throw err;
       } finally {
@@ -53,12 +63,16 @@ export const useDeptStore = create(
     deleteDept: async (params) => {
       set({ loading: true });
       try {
-        await deleteDept(params);
+        await deleteDeptApi(params);
+        set((state) => ({
+          deptList: state.deptList.filter((dept) => dept._id !== params.deptId),
+        }));
       } catch (err) {
-        throw err;
+        console.log("Delete failed: ", err);
+        return false;
       } finally {
         set({ loading: false });
       }
     },
-  }))
+  })),
 );
