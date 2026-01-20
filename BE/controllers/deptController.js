@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Department = require("../models/Department");
+const Employee = require("../models/Employee");
 
 exports.createDepartment = async (req, res) => {
   const { name, orgId } = req.body;
@@ -115,4 +116,40 @@ exports.getDeptsInOrg = async (req, res) => {
     message: "Departments fetched succesfully",
     result,
   });
+};
+
+exports.getDeptDetails = async (req, res) => {
+  try {
+    const { deptId } = req.params;
+
+    if (!deptId) {
+      return res.status(400).json({
+        success: false,
+        message: "Department ID is required",
+      });
+    }
+
+    const department = await Department.findById(deptId);
+
+    if (!department) {
+      return res.status(404).json({
+        success: false,
+        message: "Department not found",
+      });
+    }
+
+    const employees = await Employee.find({ departmentId: deptId });
+
+    return res.status(200).json({
+      success: true,
+      message: "Department details fetched successfully",
+      result: { department, employees },
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
 };

@@ -28,7 +28,8 @@ const employeeSchema = mongoose.Schema(
       required: [true, "Department Id is required"],
     },
     position: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Position",
       required: false,
     },
     salary: {
@@ -68,7 +69,7 @@ const employeeSchema = mongoose.Schema(
       of: mongoose.Schema.Types.Mixed,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Employee", employeeSchema);

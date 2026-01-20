@@ -117,7 +117,7 @@ exports.updateEmployee = async (req, res) => {
   try {
     const result = await Employee.findOneAndUpdate(
       { _id: employeeId },
-      { firstName, lastName, position, imageUrl }
+      { firstName, lastName, position, imageUrl },
     );
     return res.status(200).json({
       success: true,
@@ -152,7 +152,7 @@ exports.updateContactInfo = async (req, res) => {
     const result = await Employee.findOneAndUpdate(
       { _id: employeeId },
       { $set: updatedFields },
-      { new: true }
+      { new: true },
     );
     if (!result) {
       return res
@@ -191,7 +191,7 @@ exports.updateAttendance = async (req, res) => {
     const result = await Employee.findOneAndUpdate(
       { _id: employeeId },
       { $push: { attendance: { date, status } } },
-      { new: true }
+      { new: true },
     );
 
     if (!result) {
@@ -260,7 +260,7 @@ exports.updatePay = async (req, res) => {
       {
         $push: { payrollIds: payrollResult._id },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!employeeUpdate) {
@@ -308,7 +308,7 @@ exports.getEmployeesByOrg = async (req, res) => {
 };
 
 exports.getEmployeesByDept = async (req, res) => {
-  const { orgId, deptId } = req.body;
+  const { orgId, deptId } = req.query;
   if (!orgId) {
     return res
       .status(400)
