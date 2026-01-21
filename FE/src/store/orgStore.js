@@ -48,7 +48,7 @@ export const useOrgStore = create(
       set({ loading: true });
       try {
         const { orgs } = await getUserOrg(params);
-        set({ orgData: orgs });
+        set({ orgData: orgs, orgId: orgData._id });
       } catch (err) {
         throw err;
         set({ loading: false });

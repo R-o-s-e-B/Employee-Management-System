@@ -4,6 +4,7 @@ import {
   createDeptApi,
   deleteDeptApi,
   editDeptApi,
+  getDeptDetailsApi,
 } from "../api/deptApi";
 import { persist } from "zustand/middleware";
 
@@ -37,6 +38,18 @@ export const useDeptStore = create(
       try {
         const { result } = await getDeptsApi(orgId);
         set({ deptList: result });
+      } catch (err) {
+        throw err;
+      } finally {
+        set({ loading: false });
+      }
+    },
+
+    getDeptDetails: async (params) => {
+      set({ loading: true });
+      try {
+        const { result } = await getDeptDetailsApi(params);
+        set({ deptData: result });
       } catch (err) {
         throw err;
       } finally {

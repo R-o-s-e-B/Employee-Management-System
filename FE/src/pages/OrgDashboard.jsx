@@ -72,7 +72,9 @@ const OrgDashboard = () => {
                   autoFocus
                 />
               ) : (
-                <a> {element.name}</a>
+                <a onClick={() => navigate(`/deptDashboard/${element._id}`)}>
+                  {element.name}
+                </a>
               )}
 
               <button
