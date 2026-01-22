@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDeptStore } from "../store/deptStore";
 import { useParams } from "react-router-dom";
 import { useOrgStore } from "../store/orgStore";
+import EmployeeForm from "../components/forms/EmployeeForm";
 
 const DepartmentDashboard = () => {
   const { deptId } = useParams();
@@ -32,14 +33,8 @@ const DepartmentDashboard = () => {
         Create new employee{" "}
       </button>
 
-      <div>
-        <input placeholder="first name"></input>
-        <input placeholder="last name"></input>
-        <input placeholder="position"></input>
-        <input type="number" placeholder="salary"></input>
-        <input type="email" placeholder="email"></input>
-        <input placeholder="phone"></input>
-        <input placeholder="address"></input>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <EmployeeForm />
       </div>
     </React.Fragment>
   );

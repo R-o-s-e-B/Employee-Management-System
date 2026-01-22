@@ -1,14 +1,15 @@
 const Employee = require("../models/Employee");
 const Payroll = require("../models/Payroll");
 const validStatus = require("../config");
+const Position = require("../models/Position");
 
 exports.createEmployee = async (req, res) => {
   const {
-    organizationId: orgId,
-    departmentId: deptId,
+    orgId,
+    deptId,
     firstName,
     lastName,
-    position,
+    positionId,
     imageUrl,
     contactInfo,
   } = req.body;
@@ -33,13 +34,24 @@ exports.createEmployee = async (req, res) => {
       message: "Firstname and Last name are required!",
     });
   }
+
+  let positionRef = null;
+  if (positionId) {
+    const positionExists = await Position.exists({ positionId });
+    if (positionExists) {
+      positionRef = positionId;
+    } else {
+      positionRef = null;
+    }
+  }
+
   try {
     const newEmployee = new Employee({
-      orgId,
-      deptId,
+      organizationId: orgId,
+      departmentId: deptId,
       firstName,
       lastName,
-      position: position || null,
+      position: positionRef,
       imageUrl: imageUrl || null,
       contactInfo: contactInfo || null,
     });
@@ -57,16 +69,16 @@ exports.createEmployee = async (req, res) => {
 };
 
 exports.deleteEmployee = async (req, res) => {
-  const { employeeId, orgId, departmentId } = req.body;
-  if (!employeeId || !orgId || !departmentId) {
+  const { employeeId } = req.params;
+  if (!employeeId) {
     return req.status(400).json({
       success: false,
-      message: "Organization ID, employee ID or department ID is missing",
+      message: "Employee ID is missing",
     });
   }
   const employee = Employee.findById(employeeId);
   if (!employee) {
-    return req.status(400).json({
+    return req.status(404).json({
       success: false,
       message: "Employee does not exist",
     });
