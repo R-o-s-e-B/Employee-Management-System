@@ -23,6 +23,5 @@ export const editDeptApi = async (params) => {
 
 export const getDeptDetailsApi = async ({ deptId }) => {
   const { data } = await axiosInstance.get(`dept/deptDetails/${deptId}`);
-  console.log("data from api caller: ", data);
   return data;
 };

@@ -44,7 +44,6 @@ export const useEmployeeStore = create(
       set({ loading: true });
       try {
         await deleteEmployeeApi(id);
-        console.log("Employee has been deleted, id: ", id);
       } catch (err) {
         throw err;
       } finally {

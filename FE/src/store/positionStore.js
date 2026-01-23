@@ -6,7 +6,7 @@ import {
   deletePositionApi,
 } from "../api/positionApi";
 
-export const usePositionsStore = create(
+export const usePositionStore = create(
   persist((set) => ({
     positions: null,
     loading: false,
@@ -14,10 +14,9 @@ export const usePositionsStore = create(
     createPosition: async (params) => {
       set({ loading: true });
       try {
-        const { data } = await createPositionApi(params);
+        const { result } = await createPositionApi(params);
         set((state) => ({
-          ...state,
-          data,
+          positions: state.positions ? [...state.positions, result] : [result],
         }));
       } catch (err) {
         throw err;
@@ -26,11 +25,11 @@ export const usePositionsStore = create(
       }
     },
 
-    getPositions: async ({ orgId }) => {
+    getPositions: async (orgId) => {
       set({ loading: true });
       try {
-        const { data } = await getPositionsApi(orgId);
-        set({ positions: data });
+        const { result } = await getPositionsApi(orgId);
+        set({ positions: result });
       } catch (err) {
         throw err;
       } finally {

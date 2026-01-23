@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import CreateDeptPanel from "../components/CreateDeptPanel";
 import { useDeptStore } from "../store/deptStore";
+import { useOrgStore } from "../store/orgStore";
 import { useNavigate } from "react-router-dom";
 
 const OrgDashboard = () => {
   const navigate = useNavigate();
   const { orgId } = useParams();
+  const { setActiveOrg } = useOrgStore();
   const [deptPanel, setDeptPanel] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editDeptDetails, setEditDeptDetails] = useState({
@@ -14,6 +16,13 @@ const OrgDashboard = () => {
     name: null,
   });
   const { deptList, getAllDepts, deleteDept, editDept } = useDeptStore();
+
+  useEffect(() => {
+    if (orgId) {
+      setActiveOrg(orgId);
+    }
+  }, [orgId, setActiveOrg]);
+
   useEffect(() => {
     async function getDepts() {
       try {

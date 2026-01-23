@@ -5,6 +5,7 @@ const positionSchema = mongoose.Schema(
     name: {
       type: String,
       required: true,
+      unique: [true, "Position label must be unique"],
       trim: true,
     },
 

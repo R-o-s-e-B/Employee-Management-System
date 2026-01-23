@@ -12,7 +12,7 @@ exports.getPositionsByOrg = async (req, res) => {
   }
 
   try {
-    const result = await Position.find({ organizationId: orgId });
+    const result = await Position.find({ OrganizationId: orgId });
     if (!result) {
       return res.status(404).json({
         success: false,
@@ -46,7 +46,7 @@ exports.createPosition = async (req, res) => {
       .json({ success: false, message: "Position name was not provided" });
   }
 
-  const orgExists = await Organization.exists({ orgId });
+  const orgExists = await Organization.exists({ _id: orgId });
   if (!orgExists) {
     return res
       .status(404)
@@ -64,7 +64,7 @@ exports.createPosition = async (req, res) => {
   try {
     const newPosition = new Position({
       name,
-      organizationId: orgId,
+      OrganizationId: orgId,
       departmentId: deptId,
     });
 
@@ -73,7 +73,9 @@ exports.createPosition = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Position added successfully!", result });
   } catch (err) {
-    return res.status(501).json({ success: false, message: "Server error" });
+    return res
+      .status(501)
+      .json({ success: false, message: "Server error", err });
   }
 };
 

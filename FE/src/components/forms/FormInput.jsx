@@ -3,7 +3,7 @@ const FormInput = ({ name, placeholder, value, onChange, type, options }) => {
     return (
       <select name={name} value={value} onChange={onChange}>
         {options.map((option) => (
-          <option key={option.key} value={option.value}>
+          <option key={option.label} value={option.value}>
             {option.label}
           </option>
         ))}
@@ -14,6 +14,7 @@ const FormInput = ({ name, placeholder, value, onChange, type, options }) => {
     <input
       type="text"
       placeholder={placeholder}
+      key={name}
       name={name}
       value={value}
       onChange={onChange}

@@ -9,6 +9,11 @@ export const useOrgStore = create(
     loading: false,
     orgData: null,
 
+    setActiveOrg: (orgId) => {
+      console.log("setting active org: ", orgId);
+      set({ orgId });
+    },
+
     createOrg: async (params) => {
       set({ loading: true });
       try {

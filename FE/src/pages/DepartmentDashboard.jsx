@@ -20,8 +20,6 @@ const DepartmentDashboard = () => {
     getDept();
   }, [deptId]);
 
-  console.log("dept details: ", deptData);
-
   return (
     <React.Fragment>
       <h1>Department dashboard</h1>
@@ -34,7 +32,7 @@ const DepartmentDashboard = () => {
       </button>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <EmployeeForm />
+        <EmployeeForm orgId={orgId} deptId={deptId} />
       </div>
     </React.Fragment>
   );
