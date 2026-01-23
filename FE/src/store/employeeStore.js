@@ -13,14 +13,14 @@ import { persist } from "zustand/middleware";
 export const useEmployeeStore = create(
   persist((set) => ({
     employeeData: null,
-    allEmployees: null,
+    allEmployees: [],
     loading: false,
 
     getEmployees: async (params) => {
       set({ loading: true });
       try {
-        const { data } = await getEmployeesApi(params.deptId, params.orgId);
-        set({ allEmployees: data });
+        const { result } = await getEmployeesApi(params.deptId, params.orgId);
+        set({ allEmployees: result });
       } catch (err) {
         throw err;
       } finally {
@@ -31,8 +31,10 @@ export const useEmployeeStore = create(
     createEmployee: async (params) => {
       set({ loading: true });
       try {
-        const { data } = await createEmployeeApi(params);
-        set({ employeeData: data });
+        const { result } = await createEmployeeApi(params);
+        set((state) => ({
+          allEmployees: [...state.allEmployees, result],
+        }));
       } catch (err) {
         throw err;
       } finally {
@@ -44,6 +46,9 @@ export const useEmployeeStore = create(
       set({ loading: true });
       try {
         await deleteEmployeeApi(id);
+        set((state) => ({
+          allEmployees: state.allEmployees.filter((emp) => emp._id !== id),
+        }));
       } catch (err) {
         throw err;
       } finally {
@@ -54,7 +59,7 @@ export const useEmployeeStore = create(
     updateEmployee: async (params) => {
       set({ loading: true });
       try {
-        const { result } = updateEmployeeApi(params);
+        const { result } = await updateEmployeeApi(params);
         set({ employeeData: result });
       } catch (err) {
         throw err;

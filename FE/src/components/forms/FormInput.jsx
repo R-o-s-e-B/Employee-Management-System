@@ -1,7 +1,12 @@
 const FormInput = ({ name, placeholder, value, onChange, type, options }) => {
   if (type === "dropdown") {
     return (
-      <select name={name} value={value} onChange={onChange}>
+      <select
+        style={{ color: "black" }}
+        name={name}
+        value={value}
+        onChange={onChange}
+      >
         {options.map((option) => (
           <option key={option.label} value={option.value}>
             {option.label}

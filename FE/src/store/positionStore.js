@@ -8,7 +8,7 @@ import {
 
 export const usePositionStore = create(
   persist((set) => ({
-    positions: null,
+    positions: [],
     loading: false,
 
     createPosition: async (params) => {
@@ -42,12 +42,8 @@ export const usePositionStore = create(
       try {
         await deletePositionApi(id);
         set((state) => ({
-          positions: state.positions.filter(
-            (position) => position._id !== params.id,
-          ),
+          positions: state.positions.filter((position) => position._id !== id),
         }));
-      } catch (err) {
-        throw err;
       } finally {
         set({ loading: false });
       }

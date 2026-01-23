@@ -2,6 +2,8 @@ const Employee = require("../models/Employee");
 const Payroll = require("../models/Payroll");
 const validStatus = require("../config");
 const Position = require("../models/Position");
+const Organization = require("../models/Organization");
+const Department = require("../models/Department");
 
 exports.createEmployee = async (req, res) => {
   const {
@@ -11,7 +13,9 @@ exports.createEmployee = async (req, res) => {
     lastName,
     positionId,
     imageUrl,
-    contactInfo,
+    phone,
+    address,
+    email,
   } = req.body;
   if (!orgId || !deptId) {
     return res
@@ -19,8 +23,8 @@ exports.createEmployee = async (req, res) => {
       .json({ success: false, message: "Please provide OrgId and DeptId" });
   }
 
-  const orgExists = await Organization.exists({ _id: organizationId });
-  const deptExists = await Department.exists({ _id: departmentId });
+  const orgExists = await Organization.exists({ _id: orgId });
+  const deptExists = await Department.exists({ _id: deptId });
   if (!orgExists || !deptExists) {
     return res.status(404).json({
       success: false,
@@ -35,15 +39,23 @@ exports.createEmployee = async (req, res) => {
     });
   }
 
+  console.log("position id received is: ", positionId);
+
   let positionRef = null;
   if (positionId) {
-    const positionExists = await Position.exists({ positionId });
+    const positionExists = await Position.exists({ _id: positionId });
     if (positionExists) {
       positionRef = positionId;
     } else {
       positionRef = null;
     }
   }
+
+  const contactInfo = {
+    phone: phone || null,
+    address: address || null,
+    email: email || null,
+  };
 
   try {
     const newEmployee = new Employee({
@@ -63,7 +75,6 @@ exports.createEmployee = async (req, res) => {
       result,
     });
   } catch (err) {
-    console.log(err);
     return res.status(501).json({ success: false, message: "Server error" });
   }
 };
@@ -71,14 +82,14 @@ exports.createEmployee = async (req, res) => {
 exports.deleteEmployee = async (req, res) => {
   const { employeeId } = req.params;
   if (!employeeId) {
-    return req.status(400).json({
+    return res.status(400).json({
       success: false,
       message: "Employee ID is missing",
     });
   }
-  const employee = Employee.findById(employeeId);
+  const employee = await Employee.findById(employeeId);
   if (!employee) {
-    return req.status(404).json({
+    return res.status(404).json({
       success: false,
       message: "Employee does not exist",
     });
@@ -327,11 +338,11 @@ exports.getEmployeesByDept = async (req, res) => {
       .json({ success: false, message: "Organization ID is required" });
   }
   try {
-    const result = Employee.find({
+    const result = await Employee.find({
       organizationId: orgId,
       departmentId: deptId,
-    });
-    if (!result) {
+    }).populate("position");
+    if (result.length === 0) {
       return res
         .status(400)
         .json({ success: false, message: "No employees found" });
@@ -343,6 +354,8 @@ exports.getEmployeesByDept = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", error });
   }
 };
