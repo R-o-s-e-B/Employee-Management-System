@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import {
   getEmployeesApi,
+  getEmployeeApi,
   createEmployeeApi,
   deleteEmployeeApi,
   updateEmployeeApi,
@@ -21,6 +22,18 @@ export const useEmployeeStore = create(
       try {
         const { result } = await getEmployeesApi(params.deptId, params.orgId);
         set({ allEmployees: result });
+      } catch (err) {
+        throw err;
+      } finally {
+        set({ loading: false });
+      }
+    },
+
+    getEmployee: async (employeeId) => {
+      set({ loading: true });
+      try {
+        const { employee } = await getEmployeeApi(employeeId);
+        set({ employeeData: employee });
       } catch (err) {
         throw err;
       } finally {

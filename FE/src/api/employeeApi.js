@@ -7,6 +7,11 @@ export const getEmployeesApi = async (deptId, orgId) => {
   return data;
 };
 
+export const getEmployeeApi = async (employeeId) => {
+  const { data } = await axiosInstance.get(`employee/${employeeId}`);
+  return data;
+};
+
 export const createEmployeeApi = async (body) => {
   const { data } = await axiosInstance.post("employee/newEmployee", body);
   return data;
@@ -20,7 +25,7 @@ export const deleteEmployeeApi = async (employeeId) => {
 };
 
 export const updateEmployeeApi = async (body) => {
-  const { data } = await axiosInstance.put("employee/updateEmployee", body);
+  const { data } = await axiosInstance.patch("employee/updateEmployee", body);
   return data;
 };
 

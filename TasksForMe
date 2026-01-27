@@ -1,6 +1,4 @@
 Things to do tomorrow
 
--Create employee form
--delete employee
--update employee details
--figure out how to add attendance in calendar view and how to display the payrolls.
+-Add attendance schema, make required backend api's
+-Implement fe with a calendar library like react-day-picker, fullCalendar or mui date picker

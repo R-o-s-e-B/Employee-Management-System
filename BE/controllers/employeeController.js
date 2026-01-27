@@ -79,6 +79,37 @@ exports.createEmployee = async (req, res) => {
   }
 };
 
+exports.getEmployeeDetails = async (req, res) => {
+  const { employeeId } = req.params;
+  if (!employeeId) {
+    return res.status(400).json({
+      success: false,
+      message: "Employee ID is missing",
+    });
+  }
+  try {
+    const employee = await Employee.findById(employeeId).populate("position");
+    if (!employee) {
+      return res.status(404).json({
+        success: false,
+        message: "Employee not found!",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Employee details have been fetched",
+      employee,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      err,
+    });
+  }
+};
+
 exports.deleteEmployee = async (req, res) => {
   const { employeeId } = req.params;
   if (!employeeId) {

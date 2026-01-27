@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDeptStore } from "../store/deptStore";
 import { useParams } from "react-router-dom";
 import { useOrgStore } from "../store/orgStore";
@@ -7,10 +8,15 @@ import { useEmployeeStore } from "../store/employeeStore";
 import EmployeeForm from "../components/forms/EmployeeForm";
 
 const DepartmentDashboard = () => {
+  const navigate = useNavigate();
   const { deptId } = useParams();
   const { orgId } = useOrgStore();
   const { getDeptDetails, deptData } = useDeptStore();
   const [employeeModal, setEmployeeModal] = useState(false);
+  const [employeeUpdate, setEmployeeUpdate] = useState({
+    editMode: false,
+    employeeData: null,
+  });
   const { allEmployees, getEmployees, deleteEmployee } = useEmployeeStore();
   const { positions, deletePosition, getPositions } = usePositionStore();
   useEffect(() => {
@@ -63,7 +69,12 @@ const DepartmentDashboard = () => {
       </button>
       {employeeModal ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <EmployeeForm deptId={deptId} setShowForm={setEmployeeModal} />
+          <EmployeeForm
+            deptId={deptId}
+            setShowForm={setEmployeeModal}
+            editMode={employeeUpdate.editMode}
+            employeeData={employeeUpdate.employeeData}
+          />
         </div>
       ) : (
         <></>
@@ -85,11 +96,25 @@ const DepartmentDashboard = () => {
               style={{ flex: 1, flexDirection: "column" }}
               key={employee._id}
             >
-              <a>{employee.firstName + " " + employee.lastName}</a>
+              <a onClick={() => navigate(`/employee/${employee._id}`)}>
+                {employee.firstName + " " + employee.lastName}
+              </a>
               <p>{employee?.position?.name}</p>
               <p>{employee?.contactInfo?.phone}</p>
               <button onClick={() => handleDeleteEmployee(employee._id)}>
                 delete
+              </button>
+              <button
+                onClick={() => {
+                  setEmployeeModal(true);
+
+                  setEmployeeUpdate({
+                    editMode: true,
+                    employeeData: employee,
+                  });
+                }}
+              >
+                edit Employee
               </button>
             </div>
           ))}

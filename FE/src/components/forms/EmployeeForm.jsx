@@ -4,10 +4,9 @@ import { useEmployeeStore } from "../../store/employeeStore";
 import { useOrgStore } from "../../store/orgStore";
 import { usePositionStore } from "../../store/positionStore";
 
-const EmployeeForm = ({ deptId, setShowForm }) => {
-  const { createEmployee } = useEmployeeStore();
-  const { positions, getPositions, createPosition, deletePosition } =
-    usePositionStore();
+const EmployeeForm = ({ deptId, setShowForm, editMode, employeeData }) => {
+  const { createEmployee, updateEmployee } = useEmployeeStore();
+  const { positions, getPositions, createPosition } = usePositionStore();
   const inputTypes = {
     text: "text",
     dropdown: "dropdown",
@@ -21,6 +20,19 @@ const EmployeeForm = ({ deptId, setShowForm }) => {
     phone: "",
   });
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (editMode) {
+      setFormData({
+        firstName: employeeData.firstName,
+        lastName: employeeData.lastName,
+        positionId: employeeData.position?._id,
+        phone: employeeData.contactInfo?.phone,
+      });
+    } else {
+      resetForm();
+    }
+  }, [employeeData, deptId]);
 
   const resetForm = () => {
     setFormData({
@@ -75,6 +87,15 @@ const EmployeeForm = ({ deptId, setShowForm }) => {
       orgId: orgId,
       deptId: deptId,
     };
+    if (editMode) {
+      try {
+        await updateEmployee(dataToSubmit);
+        resetForm();
+      } catch (err) {
+        throw err;
+      }
+      return;
+    }
     try {
       await createEmployee(dataToSubmit);
       resetForm();
@@ -153,6 +174,7 @@ const EmployeeForm = ({ deptId, setShowForm }) => {
             <FormInput
               name={field.name}
               key={field.name}
+              value={formData[field.name] || ""}
               type={field.type}
               placeholder={field.placeholder}
               onChange={handleChange}
@@ -163,7 +185,9 @@ const EmployeeForm = ({ deptId, setShowForm }) => {
             )}
           </div>
         ))}
-        <button type="submit">Add employee</button>
+        <button type="submit">
+          {editMode ? "Update Employee" : "Add employee"}
+        </button>
       </form>
 
       <input

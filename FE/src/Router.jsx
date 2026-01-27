@@ -3,6 +3,7 @@ import LoginPage from "./pages/LoginPage";
 import Home from "./pages/Home";
 import OrgDashboard from "./pages/OrgDashboard";
 import DepartmentDashboard from "./pages/DepartmentDashboard";
+import EmployeePage from "./pages/EmployeePage";
 
 const Router = () => {
   return (
@@ -22,6 +23,7 @@ const Router = () => {
           path="/deptDashboard/:deptId"
           element={<DepartmentDashboard />}
         />
+        <Route path="/employee/:employeeId" element={<EmployeePage />} />
       </Routes>
     </BrowserRouter>
   );
