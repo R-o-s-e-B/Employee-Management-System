@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useEmployeeStore } from "../store/employeeStore";
 import { useParams } from "react-router-dom";
+import AttendanceCalendar from "../components/AttendanceCalendar";
 
 const EmployeePage = () => {
   const { getEmployee, employeeData } = useEmployeeStore();
@@ -25,6 +26,7 @@ const EmployeePage = () => {
       <p>Name: {employeeData.firstName + " " + employeeData.lastName} </p>
       <p>Contact: {employeeData?.contactInfo.phone}</p>
       <p>Position: {employeeData.position?.name}</p>
+      <AttendanceCalendar />
     </React.Fragment>
   );
 };

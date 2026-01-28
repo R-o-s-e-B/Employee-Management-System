@@ -12,6 +12,16 @@ export const getEmployeeApi = async (employeeId) => {
   return data;
 };
 
+export const getEmployeeAttendanceApi = async (employeeId) => {
+  const { data } = await axiosInstance.get(`employee/attendance/${employeeId}`);
+  return data;
+};
+
+export const updateEmployeeAttendanceApi = async (body) => {
+  const { data } = await axiosInstance.patch("employee/attendance", body);
+  return data;
+};
+
 export const createEmployeeApi = async (body) => {
   const { data } = await axiosInstance.post("employee/newEmployee", body);
   return data;
@@ -31,11 +41,6 @@ export const updateEmployeeApi = async (body) => {
 
 export const updateEmployeeContactDetailsApi = async (body) => {
   const { data } = await axiosInstance.put("employee/updateContactInfo", body);
-  return data;
-};
-
-export const updateEmployeeAttendanceApi = async (body) => {
-  const { data } = await axiosInstance.put("employee/updateAttendance", body);
   return data;
 };
 

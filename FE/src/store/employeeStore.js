@@ -8,6 +8,7 @@ import {
   updateEmployeeContactDetailsApi,
   updateEmployeeAttendanceApi,
   updateEmployeePayApi,
+  getEmployeeAttendanceApi,
 } from "../api/employeeApi";
 import { persist } from "zustand/middleware";
 
@@ -16,6 +17,7 @@ export const useEmployeeStore = create(
     employeeData: null,
     allEmployees: [],
     loading: false,
+    employeeAttendance: [],
 
     getEmployees: async (params) => {
       set({ loading: true });
@@ -34,6 +36,32 @@ export const useEmployeeStore = create(
       try {
         const { employee } = await getEmployeeApi(employeeId);
         set({ employeeData: employee });
+      } catch (err) {
+        throw err;
+      } finally {
+        set({ loading: false });
+      }
+    },
+
+    getEmployeeAttendance: async (employeeId) => {
+      set({ loading: true });
+      try {
+        const { result } = await getEmployeeAttendanceApi(employeeId);
+        set({ employeeAttendance: result });
+      } catch (err) {
+        console.log("Employee attendance fetching failed: ", err);
+      } finally {
+        set({ loading: false });
+      }
+    },
+
+    updateEmployeeAttendance: async (params) => {
+      set({ loading: true });
+      try {
+        const { result } = await updateEmployeeAttendanceApi(params);
+        set((state) => ({
+          employeeAttendance: [...state.employeeAttendance, result],
+        }));
       } catch (err) {
         throw err;
       } finally {
