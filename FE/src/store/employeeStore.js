@@ -60,7 +60,11 @@ export const useEmployeeStore = create(
       try {
         const { result } = await updateEmployeeAttendanceApi(params);
         set((state) => ({
-          employeeAttendance: [...state.employeeAttendance, result],
+          employeeAttendance: {
+            ...state.employeeAttendance,
+            [new Date(date).toISOString().slice(0, 10)]: status,
+          },
+          loading: false,
         }));
       } catch (err) {
         throw err;

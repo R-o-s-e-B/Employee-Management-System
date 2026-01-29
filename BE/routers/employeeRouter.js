@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const employeeController = require("../controllers/employeeController");
-const attendanceController = require("../controllers/attendanceController");
 
 router.get("/all-employees", employeeController.getEmployeesByOrg);
 router.get("/employees-by-dept", employeeController.getEmployeesByDept);
@@ -13,8 +12,8 @@ router.patch("/updatePay", employeeController.updatePay);
 router.patch("/updateContactInfo", employeeController.updateContactInfo);
 router.get(
   "/attendance/:employeeId",
-  attendanceController.getAttendanceByEmployeeId,
+  employeeController.getAttendanceByEmployeeId,
 );
-router.patch("/attendance", attendanceController.createAttendanceRecord);
+router.patch("/attendance", employeeController.createAttendanceRecord);
 
 module.exports = router;

@@ -4,7 +4,13 @@ import { useParams } from "react-router-dom";
 import AttendanceCalendar from "../components/AttendanceCalendar";
 
 const EmployeePage = () => {
-  const { getEmployee, employeeData } = useEmployeeStore();
+  const {
+    getEmployee,
+    employeeData,
+    getEmployeeAttendance,
+    updateEmployeeAttendance,
+    employeeAttendance,
+  } = useEmployeeStore();
   const { employeeId } = useParams();
 
   useEffect(() => {
@@ -18,7 +24,25 @@ const EmployeePage = () => {
     getEmployeeDetails(employeeId);
   }, [employeeId]);
 
-  console.log("Employee data from employee page is: ", employeeData);
+  useEffect(() => {
+    if (!employeeId) return;
+
+    getEmployeeAttendance(employeeId);
+  }, [employeeId]);
+
+  const handleAttendanceUpdate = async (date, status) => {
+    try {
+      await updateEmployeeAttendance({
+        employeeId,
+        date,
+        status,
+      });
+
+      await getEmployeeAttendance(employeeId);
+    } catch (err) {
+      console.log("Error updating attendance", err);
+    }
+  };
 
   return (
     <React.Fragment>
@@ -26,7 +50,10 @@ const EmployeePage = () => {
       <p>Name: {employeeData.firstName + " " + employeeData.lastName} </p>
       <p>Contact: {employeeData?.contactInfo.phone}</p>
       <p>Position: {employeeData.position?.name}</p>
-      <AttendanceCalendar />
+      <AttendanceCalendar
+        attendance={employeeAttendance}
+        onDayUpdate={handleAttendanceUpdate}
+      />
     </React.Fragment>
   );
 };

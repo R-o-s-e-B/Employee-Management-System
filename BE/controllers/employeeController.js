@@ -4,6 +4,7 @@ const validStatus = require("../config");
 const Position = require("../models/Position");
 const Organization = require("../models/Organization");
 const Department = require("../models/Department");
+const Attendance = require("../models/Attendance");
 
 exports.createEmployee = async (req, res) => {
   const {
@@ -224,43 +225,99 @@ exports.updateContactInfo = async (req, res) => {
   }
 };
 
-exports.updateAttendance = async (req, res) => {
-  const { date, status, employeeId } = req.body;
+exports.getAttendanceByEmployeeId = async (req, res) => {
+  const { employeeId } = req.params;
   if (!employeeId) {
     return res
       .status(400)
       .json({ success: false, message: "Employee ID is not provided!" });
   }
-  if (!date || !status) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Please provide date and status." });
-  }
-  if (!validStatus.includes(status)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "status is invalid" });
-  }
-  try {
-    const result = await Employee.findOneAndUpdate(
-      { _id: employeeId },
-      { $push: { attendance: { date, status } } },
-      { new: true },
-    );
 
+  try {
+    const result = await Attendance.find({ employeeId: employeeId });
     if (!result) {
       return res
         .status(400)
-        .json({ success: false, message: "Employee not found" });
+        .json({ success: false, message: "Attendance record not found" });
     }
     return res.status(200).json({
       success: true,
-      message: "Attendance has been added succesfully",
+      message: "Attendance fetched successfully",
       result,
     });
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", err });
+  }
+};
+
+exports.createAttendanceRecord = async (req, res) => {
+  const { employeeId, date, status } = req.body;
+
+  // 1️⃣ Basic validation
+  if (!employeeId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Employee ID is not provided!" });
+  }
+
+  if (!date) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Date is not provided!" });
+  }
+
+  if (!status) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Status is not provided!" });
+  }
+
+  try {
+    const attendanceDate = new Date(date);
+    attendanceDate.setHours(0, 0, 0, 0);
+
+    const employee = await Employee.findById(employeeId);
+
+    if (!employee) {
+      return res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+    }
+
+    const attendance = await Attendance.findOneAndUpdate(
+      {
+        employeeId,
+        date: attendanceDate,
+      },
+      {
+        employeeId,
+        date: attendanceDate,
+        status,
+        organizationId: employee.organizationId,
+        departmentId: employee.departmentId,
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Attendance recorded successfully",
+      attendance,
+    });
+  } catch (err) {
+    console.error("Attendance error:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while recording attendance",
+      error: err.message,
+    });
   }
 };
 
