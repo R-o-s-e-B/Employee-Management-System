@@ -89,7 +89,9 @@ exports.getEmployeeDetails = async (req, res) => {
     });
   }
   try {
-    const employee = await Employee.findById(employeeId).populate("position");
+    const employee = await Employee.findById(employeeId)
+      .populate("position")
+      .populate("payrollIds");
     if (!employee) {
       return res.status(404).json({
         success: false,
@@ -322,12 +324,12 @@ exports.createAttendanceRecord = async (req, res) => {
 };
 
 exports.updatePay = async (req, res) => {
-  let { employeeId, orgId, baseSalary, datePaid, bonuses, deductions, method } =
+  let { employeeId, baseSalary, datePaid, bonuses, deductions, method } =
     req.body;
-  if (!employeeId || !orgId) {
+  if (!employeeId) {
     return res.status(400).json({
       success: false,
-      message: "Pleasse provide employee id and organization id",
+      message: "Pleasse provide employee id",
     });
   }
   if (!datePaid) {
@@ -345,6 +347,17 @@ exports.updatePay = async (req, res) => {
       message: "Pleasse provide the payment method",
     });
   }
+
+  const employee = await Employee.findById(employeeId);
+
+  if (!employee) {
+    return res.status(404).json({
+      success: false,
+      message: "Employee not found",
+    });
+  }
+
+  const orgId = employee.organizationId;
 
   const finalAmount = baseSalary + (bonuses || 0) - (deductions || 0);
   const newPayroll = new Payroll({

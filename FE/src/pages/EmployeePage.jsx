@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useEmployeeStore } from "../store/employeeStore";
 import { useParams } from "react-router-dom";
 import AttendanceCalendar from "../components/AttendanceCalendar";
+import EmployeePayrolls from "../components/EmployeePayrolls";
 
 const EmployeePage = () => {
   const {
@@ -53,6 +54,10 @@ const EmployeePage = () => {
       <AttendanceCalendar
         attendance={employeeAttendance}
         onDayUpdate={handleAttendanceUpdate}
+      />
+      <EmployeePayrolls
+        employeeId={employeeId}
+        payrolls={employeeData?.payrollIds}
       />
     </React.Fragment>
   );

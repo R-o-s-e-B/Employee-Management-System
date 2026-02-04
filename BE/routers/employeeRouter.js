@@ -8,7 +8,7 @@ router.get("/:employeeId", employeeController.getEmployeeDetails);
 router.post("/newEmployee", employeeController.createEmployee);
 router.delete("/deleteEmployee/:employeeId", employeeController.deleteEmployee);
 router.patch("/updateEmployee", employeeController.updateEmployee);
-router.patch("/updatePay", employeeController.updatePay);
+router.put("/updatePay", employeeController.updatePay);
 router.patch("/updateContactInfo", employeeController.updateContactInfo);
 router.get(
   "/attendance/:employeeId",
