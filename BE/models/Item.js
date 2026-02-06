@@ -7,6 +7,12 @@ const itemSchema = mongoose.Schema({
     required: [true, "Item name is required."],
   },
 
+  OrganizationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Organization",
+    required: true,
+  },
+
   unit: {
     type: String,
     enum: ["kg", "litre", "bag"],
