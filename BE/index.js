@@ -14,6 +14,10 @@ const deptRouter = require("./routers/deptRouter");
 const employeeRouter = require("./routers/employeeRouter");
 const orgRouter = require("./routers/orgRouter");
 const positionRouter = require("./routers/positionRouter");
+const categoryRouter = require("./routers/CategoryRouter");
+const itemRouter = require("./routers/ItemRouter");
+const expenseRouter = require("./routers/expenseRouter");
+const salesReceiptRouter = require("./routers/salesReceiptRouter");
 
 const app = express();
 
@@ -41,6 +45,10 @@ app.use("/org", verifyToken, orgRouter);
 app.use("/dept", verifyToken, deptRouter);
 app.use("/employee", verifyToken, employeeRouter);
 app.use("/position", verifyToken, positionRouter);
+app.use("/category", verifyToken, categoryRouter);
+app.use("/item", verifyToken, itemRouter);
+app.use("/expense", verifyToken, expenseRouter);
+app.use("/salesReceipt", verifyToken, salesReceiptRouter);
 
 app.listen(config.port, () => {
   console.log("Listening...");

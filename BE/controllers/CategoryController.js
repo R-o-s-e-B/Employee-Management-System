@@ -106,3 +106,121 @@ exports.createCategories = async (req, res) => {
     });
   }
 };
+
+exports.updateCategory = async (req, res) => {
+  try {
+    const { orgId, categoryId } = req.params;
+    const { name, color } = req.body;
+
+    if (!orgId || !categoryId) {
+      return res.status(400).json({
+        success: false,
+        message: "Organization ID and Category ID are required",
+      });
+    }
+
+    const category = await Category.findOne({
+      _id: categoryId,
+      organizationId: orgId,
+      isActive: true,
+    });
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    if (category.isSystem) {
+      return res.status(403).json({
+        success: false,
+        message: "System categories cannot be modified",
+      });
+    }
+
+    // Check duplicate name
+    if (name) {
+      const duplicate = await Category.findOne({
+        organizationId: orgId,
+        type: category.type,
+        name: name.trim(),
+        _id: { $ne: categoryId },
+      });
+
+      if (duplicate) {
+        return res.status(409).json({
+          success: false,
+          message: "Category with this name already exists",
+        });
+      }
+
+      category.name = name.trim();
+    }
+
+    if (color !== undefined) {
+      category.color = color;
+    }
+
+    const result = await category.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Category updated successfully",
+      result,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating category",
+      error: err.message,
+    });
+  }
+};
+
+exports.deleteCategory = async (req, res) => {
+  try {
+    const { orgId, categoryId } = req.params;
+
+    if (!orgId || !categoryId) {
+      return res.status(400).json({
+        success: false,
+        message: "Organization ID and Category ID are required",
+      });
+    }
+
+    const category = await Category.findOne({
+      _id: categoryId,
+      organizationId: orgId,
+      isActive: true,
+    });
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    if (category.isSystem) {
+      return res.status(403).json({
+        success: false,
+        message: "System categories cannot be deleted",
+      });
+    }
+
+    category.isActive = false;
+    await category.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Category deleted successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error while deleting category",
+      error: err.message,
+    });
+  }
+};

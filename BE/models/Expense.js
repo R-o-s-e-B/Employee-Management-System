@@ -75,6 +75,10 @@ const ExpenseSchema = mongoose.Schema(
       trim: true,
       required: false,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

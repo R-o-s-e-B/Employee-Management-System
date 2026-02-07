@@ -76,7 +76,7 @@ exports.getExpensesByOrg = async (req, res) => {
     });
   }
 
-  const filters = { organizationId: orgId };
+  const filters = { organizationId: orgId, isDeleted: false };
 
   if (category) filters.category = category;
   if (accountId) filters.accountId = accountId;
@@ -104,6 +104,107 @@ exports.getExpensesByOrg = async (req, res) => {
       success: false,
       message: "Server error",
       err,
+    });
+  }
+};
+
+exports.updateExpense = async (req, res) => {
+  try {
+    const { orgId, expenseId } = req.params;
+    const {
+      accountId,
+      amount,
+      category,
+      date,
+      contactId,
+      zone,
+      items,
+      paymentMethod,
+      notes,
+      billUrl,
+    } = req.body;
+
+    if (!orgId || !expenseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Organization ID and Expense ID are required",
+      });
+    }
+
+    const expense = await Expense.findOne({
+      _id: expenseId,
+      organizationId: orgId,
+    });
+
+    if (!expense) {
+      return res.status(404).json({
+        success: false,
+        message: "Expense not found",
+      });
+    }
+
+    // Update only provided fields
+    if (accountId) expense.accountId = accountId;
+    if (amount !== undefined) expense.amount = amount;
+    if (category) expense.category = category;
+    if (date) expense.date = date;
+    if (contactId !== undefined) expense.contactId = contactId;
+    if (zone !== undefined) expense.zone = zone;
+    if (Array.isArray(items)) expense.items = items;
+    if (paymentMethod !== undefined) expense.paymentMethod = paymentMethod;
+    if (notes !== undefined) expense.notes = notes;
+    if (billUrl !== undefined) expense.billUrl = billUrl;
+
+    const result = await expense.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Expense updated successfully",
+      result,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating expense",
+      error: err.message,
+    });
+  }
+};
+
+exports.deleteExpense = async (req, res) => {
+  try {
+    const { expenseId, orgId } = req.params;
+
+    if (!orgId || !expenseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Organization ID and Expense ID are required",
+      });
+    }
+
+    const expense = await Expense.findOne({
+      _id: expenseId,
+      organizationId: orgId,
+    });
+
+    if (!expense) {
+      return res.status(404).json({
+        success: false,
+        message: "Expense not found",
+      });
+    }
+    expense.isDeleted = true;
+    await Expense.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Expense deleted successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error while deleting expense",
+      error: err.message,
     });
   }
 };
