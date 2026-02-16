@@ -68,9 +68,13 @@ const ExpensesList = ({ orgId }) => {
           <ul>
             {expenses.map((expense) => (
               <li key={expense._id}>
-                <p>Amount: {expense.amount}</p>
-                <p>Category: {expense.category?.name || "N/A"}</p>
-                <p>Date: {new Date(expense.date).toLocaleDateString()}</p>
+                <p className="text-black">Amount: {expense.amount}</p>
+                <p className="text-black">
+                  Category: {expense.category?.name || "N/A"}
+                </p>
+                <p className="text-black">
+                  Date: {new Date(expense.date).toLocaleDateString()}
+                </p>
               </li>
             ))}
           </ul>

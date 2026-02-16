@@ -1,4 +1,7 @@
 const Expense = require("../models/Expense");
+const mongoose = require("mongoose");
+// Import Contact model to register it with Mongoose for populate
+require("../models/Contact");
 
 exports.createExpense = async (req, res) => {
   const {
@@ -76,6 +79,14 @@ exports.getExpensesByOrg = async (req, res) => {
     });
   }
 
+  // Validate orgId is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(orgId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid Organization ID format",
+    });
+  }
+
   const filters = { organizationId: orgId, isDeleted: false };
 
   if (category) filters.category = category;
@@ -90,9 +101,21 @@ exports.getExpensesByOrg = async (req, res) => {
   try {
     const result = await Expense.find(filters)
       .sort({ date: -1 })
-      .populate("category")
-      .populate("accountId")
-      .populate("contactId");
+      .populate({
+        path: "category",
+        select: "name type",
+        options: { strictPopulate: false },
+      })
+      .populate({
+        path: "accountId",
+        select: "name",
+        options: { strictPopulate: false },
+      })
+      .populate({
+        path: "contactId",
+        select: "firstName lastName",
+        options: { strictPopulate: false },
+      });
 
     return res.status(200).json({
       success: true,
@@ -100,10 +123,13 @@ exports.getExpensesByOrg = async (req, res) => {
       result,
     });
   } catch (err) {
+    console.error("Error fetching expenses:", err);
+    console.error("Error stack:", err.stack);
+    console.error("Error name:", err.name);
     return res.status(500).json({
       success: false,
-      message: "Server error",
-      err,
+      message: "Server error while fetching expenses",
+      error: err.message || err.toString(),
     });
   }
 };

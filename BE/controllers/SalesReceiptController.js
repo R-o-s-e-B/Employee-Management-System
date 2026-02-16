@@ -1,4 +1,6 @@
 const SalesReceipt = require("../models/SalesReceipt");
+// Import Contact model to register it with Mongoose for populate
+require("../models/Contact");
 
 exports.createSalesReceipt = async (req, res) => {
   try {

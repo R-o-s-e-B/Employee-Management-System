@@ -76,7 +76,7 @@ const AccountsList = ({ orgId }) => {
                   borderRadius: "5px",
                 }}
               >
-                <p>
+                <p className="text-black">
                   <strong>Name:</strong> {account.name}
                 </p>
                 <p>

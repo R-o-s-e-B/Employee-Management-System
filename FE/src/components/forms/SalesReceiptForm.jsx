@@ -5,6 +5,7 @@ import { useCategoryStore } from "../../store/categoryStore";
 import { useItemStore } from "../../store/itemStore";
 import { useAccountStore } from "../../store/accountStore";
 import { useOrgStore } from "../../store/orgStore";
+import CategoryModal from "../modals/CategoryModal";
 
 const SalesReceiptForm = ({ orgId, setShowForm }) => {
   const { createSalesReceipt, loading } = useSalesReceiptStore();
@@ -32,6 +33,7 @@ const SalesReceiptForm = ({ orgId, setShowForm }) => {
   ]);
 
   const [errors, setErrors] = useState({});
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,6 +55,16 @@ const SalesReceiptForm = ({ orgId, setShowForm }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Check if "Add new category" option was selected
+    if (name === "categoryId" && value === "__add_new__") {
+      setShowCategoryModal(true);
+      // Reset the dropdown to empty
+      setFormData((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -170,6 +182,19 @@ const SalesReceiptForm = ({ orgId, setShowForm }) => {
 
   const incomeCategories = categories.filter((cat) => cat.type === "income");
 
+  // Refresh categories after modal closes
+  const handleCategoryModalClose = async () => {
+    setShowCategoryModal(false);
+    const currentOrgId = orgId || orgIdFromStore;
+    if (currentOrgId) {
+      try {
+        await getCategories({ orgId: currentOrgId });
+      } catch (err) {
+        console.log("error refreshing categories: ", err);
+      }
+    }
+  };
+
   const paymentMethods = [
     { label: "Select payment method", value: "" },
     { label: "Cash", value: "cash" },
@@ -206,6 +231,7 @@ const SalesReceiptForm = ({ orgId, setShowForm }) => {
           label: cat.name,
           value: cat._id,
         })),
+        { label: "+ Add new category", value: "__add_new__" },
       ],
     },
     {
@@ -259,6 +285,29 @@ const SalesReceiptForm = ({ orgId, setShowForm }) => {
 
   return (
     <div>
+      {/* Show button if no categories exist */}
+      {incomeCategories.length === 0 && (
+        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-sm text-yellow-800 mb-3">
+            No income categories found. Create categories to get started.
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowCategoryModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+          >
+            Add Categories
+          </button>
+        </div>
+      )}
+
+      <CategoryModal
+        isOpen={showCategoryModal}
+        onClose={handleCategoryModalClose}
+        categoryType="income"
+        orgId={orgId || orgIdFromStore}
+      />
+
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: 10 }}
