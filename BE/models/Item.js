@@ -7,7 +7,7 @@ const itemSchema = mongoose.Schema({
     required: [true, "Item name is required."],
   },
 
-  OrganizationId: {
+  organizationId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Organization",
     required: true,

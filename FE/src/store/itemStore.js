@@ -26,10 +26,10 @@ export const useItemStore = create(
       }
     },
 
-    getItems: async ({ orgId }) => {
+    getItems: async (orgId) => {
       set({ loading: true });
       try {
-        const { result } = await getItemsApi({ orgId });
+        const { result } = await getItemsApi(orgId);
         set({ items: result });
       } catch (err) {
         throw err;

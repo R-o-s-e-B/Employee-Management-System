@@ -5,7 +5,7 @@ export const createItemsApi = async (params) => {
   return data;
 };
 
-export const getItemsApi = async ({ orgId }) => {
+export const getItemsApi = async (orgId) => {
   const { data } = await axiosInstance.get(`item/${orgId}`);
   return data;
 };

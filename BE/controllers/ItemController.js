@@ -1,4 +1,4 @@
-const Item = require("../models/Item.js");
+const Item = require("../models/item.js");
 
 exports.getItems = async (req, res) => {
   const { orgId } = req.params;
@@ -61,7 +61,6 @@ exports.createItems = async (req, res) => {
 
     const existing = await Item.find({
       organizationId: orgId,
-      type: { $in: data.map((d) => d.type) },
       name: { $in: data.map((d) => d.name) },
     });
 

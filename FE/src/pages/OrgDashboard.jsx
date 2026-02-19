@@ -7,6 +7,7 @@ import AccountsList from "../components/AccountsList";
 import { useDeptStore } from "../store/deptStore";
 import { useOrgStore } from "../store/orgStore";
 import { useNavigate } from "react-router-dom";
+import ItemsList from "../components/ItemsList";
 
 const OrgDashboard = () => {
   const navigate = useNavigate();
@@ -95,6 +96,19 @@ const OrgDashboard = () => {
               Expenses
             </button>
             <button
+              onClick={() => setActiveTab("items")}
+              className={`
+                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                ${
+                  activeTab === "expenses"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }
+              `}
+            >
+              Items
+            </button>
+            <button
               onClick={() => setActiveTab("salesReceipt")}
               className={`
                 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors
@@ -166,7 +180,7 @@ const OrgDashboard = () => {
                             if (e.key == "Enter") {
                               handleEdit(
                                 editDeptDetails.id,
-                                editDeptDetails.name
+                                editDeptDetails.name,
                               );
                               setEditMode(false);
                             }
@@ -238,6 +252,12 @@ const OrgDashboard = () => {
           {activeTab === "accounts" && (
             <div className="p-6">
               <AccountsList orgId={orgId} />
+            </div>
+          )}
+
+          {activeTab === "items" && (
+            <div className="p-6">
+              <ItemsList orgId={orgId} />
             </div>
           )}
         </div>
