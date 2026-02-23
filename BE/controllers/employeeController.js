@@ -144,46 +144,61 @@ exports.deleteEmployee = async (req, res) => {
 exports.updateEmployee = async (req, res) => {
   const {
     employeeId,
-    organizationId: orgId,
-    departmentId: deptId,
+    organizationId,
+    departmentId,
     firstName,
     lastName,
-    position,
+    positionId,
+    phone,
     imageUrl,
   } = req.body;
 
   if (!employeeId) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Please provide employee ID" });
-  }
-  if (!orgId || !deptId) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Please provide OrgId and DeptId" });
-  }
-
-  const orgExists = await Organization.exists({ _id: organizationId });
-  const deptExists = await Department.exists({ _id: departmentId });
-  if (!orgExists || !deptExists) {
     return res.status(400).json({
       success: false,
-      message: "Organization or Department not found",
+      message: "Please provide employee ID",
     });
   }
+
+  if (!organizationId || !departmentId) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide OrgId and DeptId",
+    });
+  }
+
   try {
+    const updateFields = {
+      firstName,
+      lastName,
+      position: positionId, // 👈 FIXED
+      imageUrl,
+    };
+
+    // 👇 handle nested phone update
+    if (phone) {
+      updateFields.contactInfo = {
+        phone,
+      };
+    }
+
     const result = await Employee.findOneAndUpdate(
       { _id: employeeId },
-      { firstName, lastName, position, imageUrl },
+      { $set: updateFields },
+      { new: true },
     );
+
     return res.status(200).json({
       success: true,
-      message: "Employee information has been updated succesfully",
+      message: "Employee information has been updated successfully",
       result,
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 

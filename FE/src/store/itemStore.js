@@ -54,7 +54,7 @@ export const useItemStore = create(
       }
     },
 
-    deleteItem: async ({ itemId, orgId }) => {
+    deleteItem: async (itemId, orgId) => {
       set({ loading: true });
       try {
         await deleteItemApi({ itemId, orgId });

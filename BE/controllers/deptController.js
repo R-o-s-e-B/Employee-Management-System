@@ -104,17 +104,32 @@ exports.getDeptsInOrg = async (req, res) => {
       .status(400)
       .json({ success: false, message: "Organization Id is required" });
   }
-  const result = await Department.find({ organizationId: orgId });
-  if (!result) {
-    return res.status(400).json({
-      success: false,
-      message: "No departments were found in the organization",
-    });
-  }
+
+  const departments = await Department.aggregate([
+    {
+      $match: {
+        organizationId: new mongoose.Types.ObjectId(orgId),
+      },
+    },
+    {
+      $lookup: {
+        from: "employees",
+        localField: "_id",
+        foreignField: "departmentId",
+        as: "employees",
+      },
+    },
+    {
+      $addFields: {
+        employees: 0,
+      },
+    },
+  ]);
+
   return res.status(200).json({
     success: true,
     message: "Departments fetched succesfully",
-    result,
+    result: departments,
   });
 };
 

@@ -22,12 +22,15 @@ const EmployeeForm = ({ deptId, setShowForm, editMode, employeeData }) => {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (editMode) {
+    if (editMode && employeeData) {
       setFormData({
-        firstName: employeeData.firstName,
-        lastName: employeeData.lastName,
-        positionId: employeeData.position?._id,
-        phone: employeeData.contactInfo?.phone,
+        orgId: orgId,
+        deptId: deptId,
+        employeeId: employeeData._id || "",
+        firstName: employeeData.firstName || "",
+        lastName: employeeData.lastName || "",
+        positionId: employeeData.position?._id || "",
+        phone: employeeData.contactInfo?.phone || "",
       });
     } else {
       resetForm();
@@ -84,8 +87,8 @@ const EmployeeForm = ({ deptId, setShowForm, editMode, employeeData }) => {
     if (!validateEmployee()) return;
     const dataToSubmit = {
       ...formData,
-      orgId: orgId,
-      deptId: deptId,
+      organizationId: orgId,
+      departmentId: deptId,
     };
     if (editMode) {
       try {

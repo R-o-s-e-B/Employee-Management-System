@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import ItemAddModal from "./modals/ItemAddModal";
 
 const ItemsList = ({ orgId }) => {
-  const { getItems, createItems, items } = useItemStore();
+  const { getItems, createItems, items, deleteItem } = useItemStore();
   const [showItemsModal, setShowItemsModal] = useState(false);
 
   const getAllItems = async (orgId) => {
@@ -20,6 +20,10 @@ const ItemsList = ({ orgId }) => {
     getAllItems(orgId);
   }, [orgId]);
 
+  const deleteItemById = async (itemId) => {
+    await deleteItem(itemId, orgId);
+  };
+
   return (
     <React.Fragment>
       <h1>Items</h1>
@@ -29,6 +33,12 @@ const ItemsList = ({ orgId }) => {
           <div className="text-black" key={item._id}>
             <p>Item name: {item.name}</p>
             <p>Unit: {item.unit}</p>
+            <button
+              className="text-white"
+              onClick={() => deleteItemById(item._id)}
+            >
+              delete item
+            </button>
           </div>
         ))}
 
