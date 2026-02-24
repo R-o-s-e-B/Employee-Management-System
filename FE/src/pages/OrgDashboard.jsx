@@ -141,31 +141,36 @@ const OrgDashboard = () => {
                                 </h3>
                               )}
                               <p className="text-black">
-                                Employee count: {element.employees}
+                                Employee count: {element.employeeCount}
                               </p>
                             </div>
                           </div>
-                          <div className="flex gap-2 mt-4">
-                            <button
-                              onClick={() => {
-                                setEditMode(true);
-                                setEditDeptDetails({
-                                  id: element._id,
-                                  name: element.name,
-                                });
-                              }}
-                              className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                handleDelete(element._id);
-                              }}
-                              className="flex-1 px-3 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-                            >
-                              Delete
-                            </button>
+                          <div>
+                            <div className="text-black">
+                              Created by {element.createdByUser.name}
+                            </div>
+                            <div className="flex gap-2 mt-4">
+                              <button
+                                onClick={() => {
+                                  setEditMode(true);
+                                  setEditDeptDetails({
+                                    id: element._id,
+                                    name: element.name,
+                                  });
+                                }}
+                                className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  handleDelete(element._id);
+                                }}
+                                className="flex-1 px-3 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>

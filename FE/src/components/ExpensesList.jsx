@@ -67,15 +67,24 @@ const ExpensesList = ({ orgId }) => {
           <h2>Expenses List</h2>
           <ul>
             {expenses.map((expense) => (
-              <li key={expense._id}>
-                <p className="text-black">Amount: {expense.amount}</p>
-                <p className="text-black">
-                  Category: {expense.category?.name || "N/A"}
-                </p>
-                <p className="text-black">
-                  Date: {new Date(expense.date).toLocaleDateString()}
-                </p>
-              </li>
+              <div
+                key={expense._id}
+                className="p-6 w-[70%] flex flex-row justify-between shadow-lg mb-2 text-black"
+              >
+                <div className="flex flex-row items-start">
+                  <div className="w-12 h-12 bg-gray-200 rounded-sm mr-2"></div>
+                  <div className="flex flex-col text-start">
+                    <p>Rs. {expense.amount}</p>
+                    <p>Category: {expense.category?.name}</p>
+                  </div>
+                </div>
+                <div>
+                  <p>Account: {expense.accountId?.name}</p>
+                  <p>
+                    Created on: {new Date(expense.date).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
             ))}
           </ul>
         </div>

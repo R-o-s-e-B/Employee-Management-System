@@ -14,7 +14,7 @@ import { persist } from "zustand/middleware";
 
 export const useEmployeeStore = create(
   persist((set) => ({
-    employeeData: null,
+    employeeData: [],
     allEmployees: [],
     loading: false,
     employeeAttendance: [],

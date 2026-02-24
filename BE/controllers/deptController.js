@@ -121,7 +121,31 @@ exports.getDeptsInOrg = async (req, res) => {
     },
     {
       $addFields: {
-        employees: 0,
+        employeeCount: { $size: "$employees" },
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "createdBy",
+        foreignField: "_id",
+        as: "createdByUser",
+      },
+    },
+    {
+      $unwind: {
+        path: "$createdByUser",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        employees: 0, // remove full employee array
+        "createdByUser.password": 0,
+        "createdByUser.verificationCode": 0,
+        "createdByUser.verificationCodeValidation": 0,
+        "createdByUser.forgotPasswordCode": 0,
+        "createdByUser.forgotPasswordCodeValidation": 0,
       },
     },
   ]);

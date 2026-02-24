@@ -423,55 +423,58 @@ exports.updatePay = async (req, res) => {
 
 exports.getEmployeesByOrg = async (req, res) => {
   const { orgId } = req.body;
+
   if (!orgId) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Organization ID is required" });
+    return res.status(400).json({
+      success: false,
+      message: "Organization ID is required",
+    });
   }
+
   try {
-    const result = Employee.find({ organizationId: orgId });
-    if (!result) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No employees found" });
-    }
+    const result = await Employee.find({ organizationId: orgId });
+
     return res.status(200).json({
-      success: true,
-      message: "Employees in the organization fetched succesfully",
-      result,
+      success: true, // ✅ ALWAYS TRUE HERE
+      message: "Employees fetched successfully",
+      result: result || [], // ✅ always array
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
 exports.getEmployeesByDept = async (req, res) => {
   const { orgId, deptId } = req.query;
+
   if (!orgId) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Organization ID is required" });
+    return res.status(400).json({
+      success: false,
+      message: "Organization ID is required",
+    });
   }
+
   try {
     const result = await Employee.find({
       organizationId: orgId,
       departmentId: deptId,
     }).populate("position");
-    if (result.length === 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No employees found" });
-    }
+
+    // 🔥 Always return 200 with array (even empty)
     return res.status(200).json({
       success: true,
-      message: "Employees in the department fetched succesfully",
-      result,
+      message: "Employees fetched successfully",
+      result: result || [], // will be []
     });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Server error", error });
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
