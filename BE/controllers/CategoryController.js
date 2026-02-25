@@ -10,17 +10,10 @@ exports.getCategories = async (req, res) => {
 
   try {
     const result = await Category.find({ organizationId: orgId });
-
-    if (!result) {
-      return res.status(404).json({
-        success: false,
-        message: "No Category found for the organization",
-      });
-    }
     return res.status(200).json({
       success: true,
       message: "Categories fetched successfully",
-      result,
+      result: result || [],
     });
   } catch (err) {
     return res

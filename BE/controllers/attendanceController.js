@@ -10,10 +10,10 @@ exports.getAttendanceByEmployeeId = async (req, res) => {
     });
   }
   try {
-    const result = Attendance.find({ employeeId: employeeId }).sort({
-      date: 1,
-    });
-    if (!result) {
+    const result = await Attendance.find({ employeeId: employeeId })
+      .sort({ date: 1 })
+      .lean();
+    if (!result || result.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Attendance details for the employee ID was not found",

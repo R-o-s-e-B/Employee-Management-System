@@ -69,16 +69,16 @@ exports.getAllOrgs = async (req, res) => {
 
 exports.getUserOrg = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select("Organization");
-    if (!orgId) {
+    const user = await User.findById(req.user.userId).select("OrganizationId");
+    if (!user?.OrganizationId) {
       return res
-        .status(401)
+        .status(400)
         .json({ success: false, message: "Organization Id is required" });
     }
     const org = await Organization.findById(user.OrganizationId);
     if (!org) {
       return res
-        .status(401)
+        .status(404)
         .json({ success: false, message: "Organization not found" });
     }
     return res

@@ -41,6 +41,14 @@ exports.signup = async (req, res) => {
 exports.signin = async (req, res) => {
   const { email, password } = req.body;
   try {
+    if (!config.token_secret) {
+      console.error("TOKEN_SECRET is not set in environment");
+      return res.status(500).json({
+        success: false,
+        message: "Server configuration error: TOKEN_SECRET missing",
+      });
+    }
+
     const { error } = signinSchema.validate({ email, password });
     if (error) {
       return res
@@ -53,6 +61,14 @@ exports.signin = async (req, res) => {
       return res
         .status(401)
         .json({ success: false, message: "User does not exist!" });
+    }
+
+    if (!existingUser.password) {
+      console.error("User has no password set:", existingUser.email);
+      return res.status(500).json({
+        success: false,
+        message: "Invalid user account state",
+      });
     }
 
     const result = await doHashValidation(password, existingUser.password);
@@ -74,7 +90,6 @@ exports.signin = async (req, res) => {
       { expiresIn: "8h" }
     );
 
-    // 👉 no cookie here, just return JSON
     res.json({
       success: true,
       token,
@@ -88,8 +103,12 @@ exports.signin = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("Signin error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: process.env.NODE_ENV !== "production" ? error.message : undefined,
+    });
   }
 };
 
@@ -148,7 +167,7 @@ exports.sendVerificationCode = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
   const { email, code } = req.body;
   try {
-    const user = User.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({
         success: false,

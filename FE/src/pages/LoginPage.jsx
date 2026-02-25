@@ -13,15 +13,11 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [loginForm, setLoginForm] = useState(true);
   const [signupForm, setSignupForm] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log(
-      "log in fucntion called with credentials: ",
-      emailRefLogin.current.value,
-      " and password: ",
-      passwordRefLogin.current.value,
-    );
+    setLoginError("");
     try {
       await login({
         email: emailRefLogin.current.value,
@@ -29,7 +25,12 @@ const LoginPage = () => {
       });
       navigate("/home");
     } catch (err) {
-      console.log("Login failed: ", err);
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        "Login failed";
+      setLoginError(message);
     }
   };
 
@@ -49,6 +50,7 @@ const LoginPage = () => {
   };
 
   const SwitchForm = () => {
+    setLoginError("");
     setLoginForm(!loginForm);
     setSignupForm(!signupForm);
   };
@@ -106,6 +108,12 @@ const LoginPage = () => {
                 />
               </div>
             </div>
+
+            {loginError && (
+              <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
+                {loginError}
+              </div>
+            )}
 
             <div>
               <button

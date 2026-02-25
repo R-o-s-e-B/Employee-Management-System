@@ -53,7 +53,7 @@ exports.createPosition = async (req, res) => {
       .json({ success: false, message: "Organization Id provided is invalid" });
   }
   if (deptId) {
-    deptExists = await Department.exists({ deptId });
+    const deptExists = await Department.exists({ _id: deptId });
     if (!deptExists) {
       return res
         .status(404)

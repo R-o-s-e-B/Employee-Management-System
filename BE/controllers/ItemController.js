@@ -1,4 +1,4 @@
-const Item = require("../models/item.js");
+const Item = require("../models/Item");
 
 exports.getItems = async (req, res) => {
   const { orgId } = req.params;

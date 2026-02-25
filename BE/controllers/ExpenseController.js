@@ -220,7 +220,7 @@ exports.deleteExpense = async (req, res) => {
       });
     }
     expense.isDeleted = true;
-    await Expense.save();
+    await expense.save();
 
     return res.status(200).json({
       success: true,

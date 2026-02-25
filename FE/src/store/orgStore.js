@@ -17,8 +17,10 @@ export const useOrgStore = create(
     createOrg: async (params) => {
       set({ loading: true });
       try {
-        const { newOrg } = await createOrg(params);
-        set({ orgId: newOrg.orgId, orgName: newOrg.name });
+        const { result } = await createOrg(params);
+        if (result) {
+          set({ orgId: result._id, orgName: result.name });
+        }
       } catch (err) {
         throw err;
       } finally {
@@ -52,10 +54,15 @@ export const useOrgStore = create(
     getUserOrgs: async (params) => {
       set({ loading: true });
       try {
-        const { orgs } = await getUserOrg(params);
-        set({ orgData: orgs, orgId: orgData._id });
+        const { org } = await getUserOrg(params);
+        set({
+          orgData: org ? [org] : [],
+          orgId: org?._id ?? null,
+          orgName: org?.name ?? null,
+        });
       } catch (err) {
         throw err;
+      } finally {
         set({ loading: false });
       }
     },
