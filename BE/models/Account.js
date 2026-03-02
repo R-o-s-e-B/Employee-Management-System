@@ -18,6 +18,6 @@ const AccountSchema = mongoose.Schema({
     ref: "User",
     required: [true, "User ID is required"],
   },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("Account", AccountSchema);

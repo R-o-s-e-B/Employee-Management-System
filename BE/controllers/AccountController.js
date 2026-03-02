@@ -1,4 +1,5 @@
 const Account = require("../models/Account");
+require("../models/User"); // Register User model for populate
 
 exports.getAccounts = async (req, res) => {
   const { orgId } = req.params;
@@ -8,7 +9,10 @@ exports.getAccounts = async (req, res) => {
       .json({ success: false, message: "Organization Id is required" });
   }
   try {
-    const result = await Account.find({ organizationId: orgId });
+    const result = await Account.find({ organizationId: orgId })
+      .populate("createdBy", "name email")
+      .sort({ createdAt: -1 })
+      .lean();
     if (!result || result.length === 0) {
       return res.status(200).json({
         success: true,
@@ -57,11 +61,14 @@ exports.createAccount = async (req, res) => {
       createdBy: userId,
     });
 
-    const result = await newAccount.save();
+    const saved = await newAccount.save();
+    const result = await Account.findById(saved._id)
+      .populate("createdBy", "name email")
+      .lean();
 
     return res
       .status(200)
-      .json({ success: true, message: "New A ccount added", result });
+      .json({ success: true, message: "New Account added", result });
   } catch (err) {
     return res
       .status(500)
