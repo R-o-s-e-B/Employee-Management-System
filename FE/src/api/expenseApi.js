@@ -5,8 +5,15 @@ export const createExpenseApi = async (params) => {
   return data;
 };
 
-export const getExpensesByOrgApi = async ({ orgId }) => {
-  const { data } = await axiosInstance.get(`expense/${orgId}`);
+export const getExpensesByOrgApi = async ({ orgId, accountId, category, fromDate, toDate }) => {
+  const params = {};
+  if (accountId) params.accountId = accountId;
+  if (category) params.category = category;
+  if (fromDate) params.fromDate = fromDate;
+  if (toDate) params.toDate = toDate;
+  const { data } = await axiosInstance.get(`expense/${orgId}`, {
+    params: Object.keys(params).length > 0 ? params : undefined,
+  });
   return data;
 };
 

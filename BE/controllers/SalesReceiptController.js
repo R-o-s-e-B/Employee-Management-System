@@ -1,4 +1,5 @@
 const SalesReceipt = require("../models/SalesReceipt");
+const mongoose = require("mongoose");
 // Import Contact model to register it with Mongoose for populate
 require("../models/Contact");
 
@@ -101,8 +102,8 @@ exports.getSalesReceiptsByOrg = async (req, res) => {
 
     let filter = { organizationId: orgId };
 
-    if (categoryId) filter.categoryId = categoryId;
-    if (accountId) filter.accountId = accountId;
+    if (categoryId && mongoose.Types.ObjectId.isValid(categoryId)) filter.categoryId = categoryId;
+    if (accountId && mongoose.Types.ObjectId.isValid(accountId)) filter.accountId = accountId;
     if (paymentMethod) filter.paymentMethod = paymentMethod;
     if (season) filter.season = season;
     if (status) filter.status = status;

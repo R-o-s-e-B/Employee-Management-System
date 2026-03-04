@@ -89,8 +89,8 @@ exports.getExpensesByOrg = async (req, res) => {
 
   const filters = { organizationId: orgId, isDeleted: false };
 
-  if (category) filters.category = category;
-  if (accountId) filters.accountId = accountId;
+  if (category && mongoose.Types.ObjectId.isValid(category)) filters.category = category;
+  if (accountId && mongoose.Types.ObjectId.isValid(accountId)) filters.accountId = accountId;
 
   if (fromDate || toDate) {
     filters.date = {};

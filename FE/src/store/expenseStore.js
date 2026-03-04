@@ -26,11 +26,17 @@ export const useExpenseStore = create(
       }
     },
 
-    getExpensesByOrg: async ({ orgId }) => {
+    getExpensesByOrg: async ({ orgId, accountId, category, fromDate, toDate } = {}) => {
       set({ loading: true });
       try {
-        const { result } = await getExpensesByOrgApi({ orgId });
-        set({ expenses: result });
+        const { result } = await getExpensesByOrgApi({
+          orgId,
+          accountId,
+          category,
+          fromDate,
+          toDate,
+        });
+        set({ expenses: result ?? [] });
       } catch (err) {
         throw err;
       } finally {

@@ -422,7 +422,7 @@ exports.updatePay = async (req, res) => {
 };
 
 exports.getEmployeesByOrg = async (req, res) => {
-  const { orgId } = req.body;
+  const { orgId } = req.query;
 
   if (!orgId) {
     return res.status(400).json({

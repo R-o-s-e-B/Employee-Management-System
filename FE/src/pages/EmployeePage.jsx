@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useEmployeeStore } from "../store/employeeStore";
 import { useParams } from "react-router-dom";
 import AttendanceCalendar from "../components/AttendanceCalendar";
 import EmployeePayrolls from "../components/EmployeePayrolls";
 
 const EmployeePage = () => {
+  const navigate = useNavigate();
   const {
     getEmployee,
     employeeData,
@@ -27,100 +29,93 @@ const EmployeePage = () => {
 
   useEffect(() => {
     if (!employeeId) return;
-
     getEmployeeAttendance(employeeId);
   }, [employeeId]);
 
   const handleAttendanceUpdate = async (date, status) => {
     try {
-      await updateEmployeeAttendance({
-        employeeId,
-        date,
-        status,
-      });
-
+      await updateEmployeeAttendance({ employeeId, date, status });
       await getEmployeeAttendance(employeeId);
     } catch (err) {
       console.log("Error updating attendance", err);
     }
   };
 
+  const displayName =
+    [employeeData?.firstName, employeeData?.lastName].filter(Boolean).join(" ") || "Employee";
+  const initial = (employeeData?.firstName?.[0] || employeeData?.lastName?.[0] || "E").toUpperCase();
+  const role = employeeData?.position?.name;
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Employee Profile
-          </h1>
-        </div>
+    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors mb-6"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Employee Info Card */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-center w-20 h-20 mx-auto mb-4 bg-blue-100 rounded-full">
-                <span className="text-2xl font-bold text-blue-600">
-                  {employeeData.firstName?.[0]?.toUpperCase() ||
-                    employeeData.lastName?.[0]?.toUpperCase() ||
-                    "E"}
-                </span>
+        {/* Profile card */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+          <div className="p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+              <div className="w-20 h-20 rounded-2xl bg-indigo-100 flex items-center justify-center shrink-0">
+                <span className="text-3xl font-semibold text-indigo-600">{initial}</span>
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900 text-center mb-6">
-                {employeeData.firstName + " " + employeeData.lastName}
-              </h2>
-
-              <div className="space-y-4">
-                <div className="border-t border-gray-200 pt-4">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Position
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {employeeData.position?.name || "N/A"}
-                  </dd>
-                </div>
-
-                <div className="border-t border-gray-200 pt-4">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Contact
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {employeeData?.contactInfo?.phone || "N/A"}
-                  </dd>
-                </div>
-
-                {employeeData?.contactInfo?.email && (
-                  <div className="border-t border-gray-200 pt-4">
-                    <dt className="text-sm font-medium text-gray-500">
-                      Email
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900">
-                      {employeeData.contactInfo.email}
-                    </dd>
-                  </div>
+              <div className="min-w-0">
+                <h1 className="text-2xl font-semibold text-slate-900">{displayName}</h1>
+                {role && (
+                  <span className="inline-flex items-center mt-2 px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-700">
+                    {role}
+                  </span>
+                )}
+                <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                  {(employeeData?.contactInfo?.phone || employeeData?.contactInfo?.email) && (
+                    <>
+                      {employeeData?.contactInfo?.phone && (
+                        <div>
+                          <dt className="text-slate-500">Phone</dt>
+                          <dd className="font-medium text-slate-900">{employeeData.contactInfo.phone}</dd>
+                        </div>
+                      )}
+                      {employeeData?.contactInfo?.email && (
+                        <div>
+                          <dt className="text-slate-500">Email</dt>
+                          <dd className="font-medium text-slate-900 truncate">{employeeData.contactInfo.email}</dd>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </dl>
+                {!employeeData?.contactInfo?.phone && !employeeData?.contactInfo?.email && (
+                  <p className="text-sm text-slate-500 mt-2">No contact info</p>
                 )}
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Attendance Calendar */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Attendance Calendar
-              </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Attendance */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4">Attendance</h2>
               <AttendanceCalendar
-                attendance={employeeAttendance}
+                attendance={employeeAttendance ?? []}
                 onDayUpdate={handleAttendanceUpdate}
               />
             </div>
+          </div>
 
-            {/* Payrolls */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Payroll History
-              </h3>
+          {/* Payroll */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4">Payroll history</h2>
               <EmployeePayrolls
                 employeeId={employeeId}
                 payrolls={employeeData?.payrollIds}

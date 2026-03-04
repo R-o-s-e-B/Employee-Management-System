@@ -1,5 +1,12 @@
 import axiosInstance from "../utils/axiosInstance";
 
+export const getEmployeesByOrgApi = async (orgId) => {
+  const { data } = await axiosInstance.get("employee/all-employees", {
+    params: { orgId },
+  });
+  return data;
+};
+
 export const getEmployeesApi = async (deptId, orgId) => {
   const { data } = await axiosInstance.get("employee/employees-by-dept", {
     params: { deptId, orgId },
