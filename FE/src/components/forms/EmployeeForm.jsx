@@ -94,6 +94,7 @@ const EmployeeForm = ({ deptId, setShowForm, editMode, employeeData }) => {
       try {
         await updateEmployee(dataToSubmit);
         resetForm();
+        setShowForm(false);
       } catch (err) {
         throw err;
       }
@@ -188,7 +189,7 @@ const EmployeeForm = ({ deptId, setShowForm, editMode, employeeData }) => {
             )}
           </div>
         ))}
-        <button type="submit">
+        <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors" type="submit">
           {editMode ? "Update Employee" : "Add employee"}
         </button>
       </form>
@@ -198,9 +199,10 @@ const EmployeeForm = ({ deptId, setShowForm, editMode, employeeData }) => {
         type={inputTypes.text}
         placeholder={"Enter position"}
         ref={positionRef}
+        className="border border-slate-300 rounded-md px-2 py-1 my-10 mr-4"
         onChange={(e) => (positionRef.current.value = e.target.value)}
       />
-      <button onClick={addPosition}>Add new position</button>
+      <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors cursor-pointer" onClick={addPosition}>Add new position</button>
     </div>
   );
 };

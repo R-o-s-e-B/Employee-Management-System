@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import FormInput from "./FormInput";
 import { useSalesReceiptStore } from "../../store/salesReceiptStore";
 import { useCategoryStore } from "../../store/categoryStore";
@@ -107,6 +107,23 @@ const SalesReceiptForm = ({ orgId, setShowForm }) => {
     setItemsList([{ itemId: "", quantity: "", rate: "", unit: "kg" }]);
     setErrors({});
   };
+
+  const itemsTotal = useMemo(() => {
+    return itemsList.reduce((sum, item) => {
+      const qty = parseFloat(item.quantity) || 0;
+      const rate = parseFloat(item.rate) || 0;
+      return sum + qty * rate;
+    }, 0);
+  }, [itemsList]);
+
+  const targetAmount = parseFloat(formData.amount) || 0;
+  const amountDifference = useMemo(() => {
+    if (targetAmount <= 0) return null;
+    const diff = itemsTotal - targetAmount;
+    if (Math.abs(diff) < 0.01) return { type: "match" };
+    if (diff > 0) return { type: "exceeded", value: diff };
+    return { type: "short", value: -diff };
+  }, [itemsTotal, targetAmount]);
 
   const validateSalesReceipt = () => {
     const newErrors = {};
@@ -329,7 +346,27 @@ const SalesReceiptForm = ({ orgId, setShowForm }) => {
         ))}
 
         <div>
-          <h3>Items (optional)</h3>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <h3 className="text-base font-medium text-slate-800">Items (optional)</h3>
+            {targetAmount > 0 && amountDifference && (
+              <span
+                className={`text-sm font-medium ${
+                  amountDifference.type === "match"
+                    ? "text-emerald-600"
+                    : amountDifference.type === "exceeded"
+                      ? "text-red-600"
+                      : "text-amber-600"
+                }`}
+              >
+                {amountDifference.type === "match"
+                  ? "Items total matches amount"
+                  : amountDifference.type === "exceeded"
+                    ? `Amount exceeded by ₹${amountDifference.value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : `₹${amountDifference.value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} more till amount`}
+              </span>
+            )}
+          </div>
+
           {itemsList.map((item, index) => (
             <div
               key={index}

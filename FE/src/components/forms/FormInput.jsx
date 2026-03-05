@@ -1,4 +1,4 @@
-const FormInput = ({ name, placeholder, value, onChange, type, options }) => {
+const FormInput = ({ name, placeholder, value, onChange, type, options, className }) => {
   const inputStyle = {
     width: "100%",
     padding: "8px 12px",
@@ -13,6 +13,7 @@ const FormInput = ({ name, placeholder, value, onChange, type, options }) => {
   if (type === "dropdown") {
     return (
       <select
+        className={className}
         style={{
           ...inputStyle,
           color: "#333",
@@ -40,6 +41,7 @@ const FormInput = ({ name, placeholder, value, onChange, type, options }) => {
         name={name}
         value={value}
         onChange={onChange}
+        className={className}
         style={inputStyle}
       />
     );
@@ -55,6 +57,7 @@ const FormInput = ({ name, placeholder, value, onChange, type, options }) => {
         value={value}
         onChange={onChange}
         step="0.01"
+        className={className}
         style={inputStyle}
       />
     );
@@ -68,6 +71,7 @@ const FormInput = ({ name, placeholder, value, onChange, type, options }) => {
       name={name}
       value={value}
       onChange={onChange}
+      className={className}
       style={inputStyle}
     />
   );

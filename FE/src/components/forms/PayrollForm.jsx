@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import FormInput from "./FormInput";
 import { useEmployeeStore } from "../../store/employeeStore";
 
-const PayrollForm = ({ employeeId }) => {
+const PayrollForm = ({ employeeId, onSuccess }) => {
   const { updateEmployeePayroll } = useEmployeeStore();
   const [errors, setErrors] = useState({
     baseSalary: "",
@@ -60,11 +60,11 @@ const PayrollForm = ({ employeeId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateInput) return;
+    if (!validateInput()) return;
     try {
-      console.log("Employee form details", formData);
       await updateEmployeePayroll({ ...formData, employeeId: employeeId });
       resetForm();
+      onSuccess?.();
     } catch (err) {
       console.log(err);
     }
@@ -92,6 +92,7 @@ const PayrollForm = ({ employeeId }) => {
             value={formData[field.name]}
             type={field.type}
             onChange={handleChange}
+            className="border border-slate-300 rounded-md px-2 py-1 my-1"
             options={field.type == "dropdown" ? field.options : null}
           ></FormInput>
           {errors[field?.name] && (
@@ -99,7 +100,9 @@ const PayrollForm = ({ employeeId }) => {
           )}
         </div>
       ))}
-      <button type="submit">Add payroll</button>
+      <button 
+      className="bg-indigo-600 text-white w-full py-2 rounded-md hover:bg-indigo-700 transition-colors" 
+      type="submit">Add payroll</button>
     </form>
   );
 };

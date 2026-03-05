@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import CreateDeptPanel from "../components/CreateDeptPanel";
 import ExpensesList from "../components/ExpensesList";
@@ -13,6 +13,19 @@ import SideNavBar from "../components/SideNavBar";
 import { getEmployeesByOrgApi } from "../api/employeeApi";
 import { getExpensesByOrgApi } from "../api/expenseApi";
 import { getSalesReceiptsByOrgApi } from "../api/salesReceiptApi";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 
 const OrgDashboard = () => {
   const navigate = useNavigate();
@@ -25,8 +38,11 @@ const OrgDashboard = () => {
     totalEmployees: null,
     totalExpenses: null,
     totalSales: null,
+    salesList: [],
+    expensesList: [],
     loading: false,
   });
+  const [salesTrendPeriod, setSalesTrendPeriod] = useState("6months"); // "week" | "month" | "6months"
   const [deptPanel, setDeptPanel] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editDeptDetails, setEditDeptDetails] = useState({
@@ -79,11 +95,15 @@ const OrgDashboard = () => {
         next.totalEmployees = employees.length;
         next.totalExpenses = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
         next.totalSales = sales.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+        next.salesList = sales;
+        next.expensesList = expenses;
       } catch (err) {
         if (!cancelled) {
           next.totalEmployees = 0;
           next.totalExpenses = 0;
           next.totalSales = 0;
+          next.salesList = [];
+          next.expensesList = [];
         }
       }
       if (!cancelled) setStats((s) => ({ ...s, ...next }));
@@ -106,6 +126,63 @@ const OrgDashboard = () => {
       console.log(err);
     }
   };
+
+  const profit = useMemo(() => {
+    const sales = Number(stats.totalSales) || 0;
+    const expenses = Number(stats.totalExpenses) || 0;
+    return sales - expenses;
+  }, [stats.totalSales, stats.totalExpenses]);
+
+  const salesTrendData = useMemo(() => {
+    const sales = stats.salesList || [];
+    if (!sales.length) return [];
+    const now = new Date();
+    const cutoff = new Date(now);
+    if (salesTrendPeriod === "week") cutoff.setDate(cutoff.getDate() - 7);
+    else if (salesTrendPeriod === "month") cutoff.setMonth(cutoff.getMonth() - 1);
+    else cutoff.setMonth(cutoff.getMonth() - 6);
+    const filtered = sales.filter((s) => new Date(s.dateReceived || s.date) >= cutoff);
+    const byKey = {};
+    filtered.forEach((s) => {
+      const date = new Date(s.dateReceived || s.date);
+      let key;
+      if (salesTrendPeriod === "week") key = date.toISOString().slice(0, 10);
+      else if (salesTrendPeriod === "month") key = date.toISOString().slice(0, 10);
+      else key = date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0");
+      byKey[key] = (byKey[key] || 0) + (Number(s.amount) || 0);
+    });
+    const sortedKeys = Object.keys(byKey).sort();
+    const label = (key) => {
+      if (salesTrendPeriod === "6months") {
+        const [y, m] = key.split("-");
+        const d = new Date(parseInt(y, 10), parseInt(m, 10) - 1);
+        return d.toLocaleDateString("en-IN", { month: "short", year: "2-digit" });
+      }
+      const d = new Date(key);
+      return salesTrendPeriod === "week"
+        ? d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })
+        : d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    };
+    return sortedKeys.map((key) => ({ name: label(key), amount: byKey[key], amt: byKey[key] }));
+  }, [stats.salesList, salesTrendPeriod]);
+
+  const expenseBreakdownData = useMemo(() => {
+    const expenses = stats.expensesList || [];
+    if (!expenses.length) return [];
+    const byCategory = {};
+    expenses.forEach((e) => {
+      const name = e.category?.name || "Uncategorized";
+      byCategory[name] = (byCategory[name] || 0) + (Number(e.amount) || 0);
+    });
+    const colors = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#ec4899"];
+    return Object.entries(byCategory).map(([name, value], i) => ({
+      name,
+      value,
+      fill: colors[i % colors.length],
+    }));
+  }, [stats.expensesList]);
+
+  const PIE_COLORS = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#ec4899"];
 
   return (
     <div className="w-full min-h-screen bg-slate-50 flex flex-row">
@@ -131,40 +208,163 @@ const OrgDashboard = () => {
           {/* Tab Content */}
           <div className="max-w-6xl mx-auto">
             {activeTab === "Dashboard" && (
-              <div>
-                <h2 className="text-lg font-semibold text-slate-800 mb-4">Overview</h2>
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-slate-800">Overview</h2>
                 {stats.loading ? (
                   <p className="text-slate-500 text-sm">Loading stats...</p>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
-                        <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-slate-500">Total employees</p>
-                        <p className="mt-1 text-2xl font-semibold text-slate-900">{stats.totalEmployees ?? "—"}</p>
+                  <>
+                    {/* Profit / Net Income - prominent */}
+                    <div
+                      className={`rounded-xl border p-5 flex items-center justify-between ${
+                        profit >= 0
+                          ? "bg-emerald-50 border-emerald-200"
+                          : "bg-red-50 border-red-200"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                            profit >= 0 ? "bg-emerald-100" : "bg-red-100"
+                          }`}
+                        >
+                          <svg
+                            className={`w-6 h-6 ${profit >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium ${profit >= 0 ? "text-emerald-700" : "text-red-700"}`}>
+                            Profit / Net Income
+                          </p>
+                          <p className={`text-2xl font-bold ${profit >= 0 ? "text-emerald-800" : "text-red-800"}`}>
+                            ₹{profit.toLocaleString("en-IN")}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-0.5">Sales − Expenses</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
-                        <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+
+                    {/* Stats row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="bg-white rounded-xl border border-slate-200 p-5 flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+                          <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-500">Total employees</p>
+                          <p className="mt-1 text-2xl font-semibold text-slate-900">{stats.totalEmployees ?? "—"}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-slate-500">Total expenses</p>
-                        <p className="mt-1 text-2xl font-semibold text-slate-900">{stats.totalExpenses != null ? `₹${Number(stats.totalExpenses).toLocaleString()}` : "—"}</p>
+                      <div className="bg-white rounded-xl border border-slate-200 p-5 flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                          <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-500">Total expenses</p>
+                          <p className="mt-1 text-2xl font-semibold text-slate-900">{stats.totalExpenses != null ? `₹${Number(stats.totalExpenses).toLocaleString()}` : "—"}</p>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-xl border border-slate-200 p-5 flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                          <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-500">Total sales</p>
+                          <p className="mt-1 text-2xl font-semibold text-slate-900">{stats.totalSales != null ? `₹${Number(stats.totalSales).toLocaleString()}` : "—"}</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                        <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+
+                    {/* Sales Trend */}
+                    <div className="bg-white rounded-xl border border-slate-200 p-5">
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <h3 className="text-base font-semibold text-slate-800">Sales trend</h3>
+                        <div className="flex gap-1">
+                          {[
+                            { key: "week", label: "This week" },
+                            { key: "month", label: "This month" },
+                            { key: "6months", label: "Last 6 months" },
+                          ].map(({ key, label }) => (
+                            <button
+                              key={key}
+                              type="button"
+                              onClick={() => setSalesTrendPeriod(key)}
+                              className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                                salesTrendPeriod === key
+                                  ? "bg-indigo-600 text-white"
+                                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-slate-500">Total sales</p>
-                        <p className="mt-1 text-2xl font-semibold text-slate-900">{stats.totalSales != null ? `₹${Number(stats.totalSales).toLocaleString()}` : "—"}</p>
-                      </div>
+                      {salesTrendData.length > 0 ? (
+                        <div className="h-64">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={salesTrendData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                              <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#64748b" />
+                              <YAxis tick={{ fontSize: 12 }} stroke="#64748b" tickFormatter={(v) => `₹${v >= 1000 ? (v / 1000) + "k" : v}`} />
+                              <Tooltip formatter={(value) => [`₹${Number(value).toLocaleString()}`, "Sales"]} labelStyle={{ color: "#0f172a" }} />
+                              <Line type="monotone" dataKey="amt" stroke="#6366f1" strokeWidth={2} dot={{ fill: "#6366f1" }} name="Sales" />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-slate-500 py-8 text-center">No sales data for this period.</p>
+                      )}
                     </div>
-                  </div>
+
+                    {/* Expense breakdown */}
+                    <div className="bg-white rounded-xl border border-slate-200 p-5">
+                      <h3 className="text-base font-semibold text-slate-800 mb-4">Expense breakdown</h3>
+                      {expenseBreakdownData.length > 0 ? (
+                        <div className="h-72 flex flex-col sm:flex-row items-center gap-4">
+                          <div className="w-full sm:w-1/2 h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie
+                                  data={expenseBreakdownData}
+                                  dataKey="value"
+                                  nameKey="name"
+                                  cx="50%"
+                                  cy="50%"
+                                  outerRadius={80}
+                                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                >
+                                  {expenseBreakdownData.map((entry, index) => (
+                                    <Cell key={entry.name} fill={entry.fill || PIE_COLORS[index % PIE_COLORS.length]} />
+                                  ))}
+                                </Pie>
+                                <Tooltip formatter={(value) => [`₹${Number(value).toLocaleString()}`, "Amount"]} />
+                                <Legend />
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <ul className="w-full sm:w-1/2 space-y-1 text-sm text-slate-700">
+                            {expenseBreakdownData.map((entry) => (
+                              <li key={entry.name} className="flex justify-between items-center">
+                                <span className="flex items-center gap-2">
+                                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: entry.fill }} />
+                                  {entry.name}
+                                </span>
+                                <span>₹{Number(entry.value).toLocaleString()}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-slate-500 py-8 text-center">No expenses to break down.</p>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
             )}

@@ -55,3 +55,10 @@ export const updateEmployeePayApi = async (body) => {
   const { data } = await axiosInstance.put("employee/updatePay", body);
   return data;
 };
+
+export const getPayrollsByEmployeeApi = async (employeeId, params = {}) => {
+  const { data } = await axiosInstance.get(`employee/${employeeId}/payrolls`, {
+    params: { method: params.method || undefined, fromDate: params.fromDate || undefined, toDate: params.toDate || undefined },
+  });
+  return data;
+};

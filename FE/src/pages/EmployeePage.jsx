@@ -61,7 +61,7 @@ const EmployeePage = () => {
         </button>
 
         {/* Profile card */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
           <div className="p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
               <div className="w-20 h-20 rounded-2xl bg-indigo-100 flex items-center justify-center shrink-0">
@@ -100,10 +100,10 @@ const EmployeePage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Attendance */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Attendance - half page */}
+          <div>
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
               <h2 className="text-lg font-semibold text-slate-800 mb-4">Attendance</h2>
               <AttendanceCalendar
                 attendance={employeeAttendance ?? []}
@@ -112,13 +112,13 @@ const EmployeePage = () => {
             </div>
           </div>
 
-          {/* Payroll */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          {/* Payroll - half page */}
+          <div>
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
               <h2 className="text-lg font-semibold text-slate-800 mb-4">Payroll history</h2>
               <EmployeePayrolls
                 employeeId={employeeId}
-                payrolls={employeeData?.payrollIds}
+                onPayrollAdded={() => getEmployee(employeeId)}
               />
             </div>
           </div>

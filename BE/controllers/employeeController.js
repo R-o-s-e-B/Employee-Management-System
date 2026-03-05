@@ -374,15 +374,19 @@ exports.updatePay = async (req, res) => {
 
   const orgId = employee.organizationId;
 
-  const finalAmount = baseSalary + (bonuses || 0) - (deductions || 0);
+  const base = Number(baseSalary) || 0;
+  const bonusNum = Number(bonuses) || 0;
+  const deductionNum = Number(deductions) || 0;
+  const finalAmount = base + bonusNum - deductionNum;
+
   const newPayroll = new Payroll({
     employeeId,
     organizationId: orgId,
     datePaid,
-    baseSalary,
-    bonuses: bonuses || 0,
-    deductions: deductions || 0,
-    finalAmount: finalAmount,
+    baseSalary: base,
+    bonuses: bonusNum,
+    deductions: deductionNum,
+    finalAmount,
     method: method,
   });
 
@@ -414,6 +418,49 @@ exports.updatePay = async (req, res) => {
       message: "Payroll created and linked to employee successfully",
       payroll: payrollResult,
       employee: employeeUpdate,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+exports.getPayrollsByEmployeeId = async (req, res) => {
+  const { employeeId } = req.params;
+  const { method, fromDate, toDate } = req.query;
+
+  if (!employeeId) {
+    return res.status(400).json({
+      success: false,
+      message: "Employee ID is required",
+    });
+  }
+
+  try {
+    const filter = { employeeId };
+
+    if (method) filter.method = method;
+
+    if (fromDate || toDate) {
+      filter.datePaid = {};
+      if (fromDate) {
+        const from = new Date(fromDate);
+        from.setHours(0, 0, 0, 0);
+        filter.datePaid.$gte = from;
+      }
+      if (toDate) {
+        const to = new Date(toDate);
+        to.setHours(23, 59, 59, 999);
+        filter.datePaid.$lte = to;
+      }
+    }
+
+    const result = await Payroll.find(filter).sort({ datePaid: -1 }).lean();
+
+    return res.status(200).json({
+      success: true,
+      message: "Payrolls fetched successfully",
+      result: result || [],
     });
   } catch (err) {
     console.log(err);
